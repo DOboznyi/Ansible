@@ -1,7 +1,7 @@
 ---
 - name: installs common utilities
   apt:
-    pkg: {{ item }} 
+    pkg: "{{ item }}" 
     state: latest 
     update_cache: true
   with_items:
