@@ -49,7 +49,3 @@
     reload: true
     state: present
   when: swapfile_vfs_cache_pressure is defined
-  tags:
-    - configuration
-    - swapfile
-    - swapfile-vm-vfs-cache-pressure
