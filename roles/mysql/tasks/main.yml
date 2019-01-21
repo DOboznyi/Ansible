@@ -2,7 +2,7 @@
 
 - name: install MySQL packages
   apt: 
-    pkg: {{ item }} 
+    pkg: "{{ item }}" 
     state: installed 
     update_cache: yes
   with_items: "{{ mysql_packages }}"
