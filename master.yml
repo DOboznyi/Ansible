@@ -1,8 +1,8 @@
 ---
- - hosts: prod
-   become: yes
-   user: root
-   roles:
+- hosts: prod
+  become: yes
+  user: root
+  roles:
     - common
     - nginx
     - mysql
@@ -11,3 +11,8 @@
     - letsencrypt
     - phpmyadmin
     - wordpress
+    - opendkim
+    - postfix
+    - dovecot
+    - roundcube
+    - swap
