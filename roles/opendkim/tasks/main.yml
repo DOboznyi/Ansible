@@ -1,0 +1,63 @@
+---
+- name: install opendkim
+  apt: 
+    name: {{ item }}
+    state: latest 
+    update_cache: true
+  with_items:
+    - opendkim
+    - opendkim-tools
+  
+- name: Add postfix user to opendkim group
+  user:
+    name: postfix
+    groups: opendkim
+    append: yes
+      
+- name: create opendkim directory
+  file: 
+    name: /etc/opendkim 
+    state: directory 
+    owner: opendkim 
+    group: opendkim 
+    recurse: yes 
+
+- name: add opendkim config
+  template: 
+    src: {{ item.src }} 
+    dest: "{{ item.dest }}" 
+    mode: 0644
+  with_items:
+    - {src: 'opendkim.conf.j2',dest: '/etc/opendkim.conf'}
+    - {src: 'key.table.j2',dest: '/etc/opendkim/key.table'}
+    - {src: 'signing.table.j2',dest: '/etc/opendkim/signing.table'}
+    - {src: 'trusted.hosts.j2',dest: '/etc/opendkim/trusted.hosts'}    
+
+- name: create keys directory
+  file: 
+    name: /etc/opendkim/keys 
+    state: directory 
+    mode: 0600 
+  
+- name: generate dkim keys
+  command: 
+    chdir: /etc/opendkim opendkim-genkey -b 4096 -h rsa-sha256 -r -s {{ YYYYMM }} -d {{ domain }} -v
+  
+- name: Copy to root folder archive 
+  shell: mv {{ item.src }} {{ item.dest }}
+  with_items:
+    - {src: '/etc/opendkim/{{ YYYYMM }}.private',dest: '/etc/opendkim/keys/{{ name }}.private'}
+    - {src: '/etc/opendkim/{{ YYYYMM }}.txt',dest: '/etc/opendkim/keys/{{ name }}.txt'}
+  notify:
+    - restart opendkim
+    
+- name: Set permission for keys
+  file:
+    path: "{{ item.path }}"
+    owner: opendkim
+    group: opendkim
+    mode: 0700
+  with_items:
+    - { path: '/etc/opendkim/keys' }
+    - { path: '/etc/opendkim/keys/{{ name }}.txt' }
+    - { path: '/etc/opendkim/keys/{{ name }}.private' }

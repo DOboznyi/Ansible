@@ -1,0 +1,13 @@
+---
+ - hosts: prod
+   become: yes
+   user: root
+   roles:
+    - common
+    - nginx
+    - mysql
+    - php
+    - composer
+    - letsencrypt
+    - phpmyadmin
+    - wordpress

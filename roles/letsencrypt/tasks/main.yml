@@ -1,0 +1,46 @@
+---
+
+- name: install letsencrypt
+  apt: 
+    name: letsencrypt 
+    state: latest 
+    update_cache: true
+
+- name: create letsencrypt directory
+  file: 
+    name: /var/www/letsencrypt 
+    state: directory
+  
+- name: add letsencrypt virtualhost
+  template: 
+    src: letsencrypt.j2 
+    dest: /etc/nginx/sites-available/letsencrypt 
+    mode: 0640
+
+- name: enable letsencrypt
+  file: 
+    src: /etc/nginx/sites-available/letsencrypt 
+    dest: /etc/nginx/sites-enabled/letsencrypt 
+    state: link
+    
+- name: Reload nginx to activate letsencrypt site
+  service: 
+    name: nginx 
+    state: restarted
+  
+- name: add domains
+  template: 
+    src: domains.j2 
+    dest: /var/www/letsencrypt/domains 
+    mode: 0640
+  
+- name: Create letsencrypt certificate
+  shell: letsencrypt certonly -n --webroot -w /var/www/letsencrypt -m {{ letsencrypt_email }} --agree-tos $(sed 's/^\| / -d /g' /var/www/letsencrypt/domains) --cert-name {{ domain }}
+  args:
+    creates: /etc/letsencrypt/live/{{ domain }}
+    
+- name: Add letsencrypt cronjob for cert renewal
+  cron:
+    name: letsencrypt_renewal
+    special_time: weekly
+    job: letsencrypt --renew certonly -n --webroot -w /var/www/letsencrypt -m {{ letsencrypt_email }} --agree-tos $(sed 's/^\| / -d /g' /var/www/letsencrypt/domains) --cert-name {{ domain }} && service nginx reload 

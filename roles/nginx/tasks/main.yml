@@ -1,0 +1,39 @@
+---
+
+- name: apt-get update and install nginx
+  apt: name=nginx state=latest update_cache=true
+  register: nginxinstalled
+  notify:
+      - start nginx
+
+- name: nginx instalation failed
+  when: nginxinstalled|failed
+  fail: msg="nginx instalation failed, please check logs"
+
+- name: push nginx.conf template
+  when: nginxinstalled|success
+  template: src=roles/nginx/templates/nginx.conf.j2 dest=/etc/nginx/nginx.conf mode=0640
+
+- name: check nginx config
+  when: nginxinstalled|success
+  command: /usr/sbin/nginx -t
+  register: nginxconfig 
+
+- name: nginx config error
+  when: nginxconfig|failed
+  fail: msg="nginx config error, check your config..."
+
+- name: remove default virtualhost
+  when: nginxconfig|success
+  file: dest=/etc/nginx/sites-available/default state=absent
+  
+- name: copy modified default virtualhost
+  when: nginxconfig|success
+  template: src=roles/nginx/templates/default.j2 dest=/etc/nginx/sites-available/default mode=0640
+
+- name: document root permissions
+  when: nginxinstalled|success
+  file: dest=/var/www mode=775 state=directory owner=www-data group=www-data recurse=yes
+  notify:
+    - reload nginx
+

@@ -1,0 +1,51 @@
+---
+- name: check if DB exists
+  shell: mysql --user={{ db_username }} --password={{ db_password }} -e 'SHOW DATABASES;' | grep -c {{ db_name }}
+  register: dbstatus
+  failed_when: dbstatus.rc == 2
+
+- name: Create database
+  mysql_db: 
+    name: "{{db_name}}"
+    encoding: utf8
+    collation: utf8_general_ci
+    state: present
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_root_username }}"
+    login_password: "{{ db_root_password }}"
+  when: dbstatus.stdout == "0"
+
+- name: Create application user in the database
+  mysql_user: 
+    name: "{{ db_username }}"
+    password: "{{ db_password }}"
+    append_privs: true
+    priv: "{{ db_name }}.*:ALL"
+    state: present
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_root_username }}"
+    login_password: "{{ db_root_password }}"
+  when: dbstatus.stdout == "0"
+
+- name: Download RoundCube
+  get_url: 
+    url: https://github.com/roundcube/roundcubemail/releases/download/{{ rc_version }}/roundcubemail-{{ rc_version }}-complete.tar.gz 
+    dest: /var/www/roundcube-{{ rc_version }}.tar.gz
+  
+- name: Extract archive
+  command: 
+    chdir: /var/www/ /bin/tar xvf roundcube-{{ rc_version }}.tar.gz -C /var/www/roundcube
+  
+- name: Change ownership of RoundCube installation
+  file: 
+    path: /var/www/roundcube
+    owner: www-data
+    group: www-data
+    state: directory
+    recurse: yes
+    setype: httpd_sys_content_t
+    mode: 0750
+
+- name: Change ownership of RoundCube installation
+  command: 
+    chdir: /var/www/roundcube composer install --no-dev

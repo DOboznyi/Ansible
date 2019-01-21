@@ -1,0 +1,55 @@
+---
+
+- name: install dovecot
+  apt: 
+    name: {{ item }} 
+    state: latest 
+    update_cache: true
+  with_items:
+    - dovecot-core
+    - dovecot-imapd
+    - dovecot-pop3d
+    - dovecot-lmtpd
+    - dovecot-mysql
+    
+- name: add group "vmail" exists
+  group:
+    name: vmail
+    state: present    
+    
+- name: Add the user 'vmail'
+  user:
+    name: vmail
+    group: vmail
+
+- name: Add vmail user to mail group
+  user:
+    name: vmail
+    groups: mail
+    append: yes
+      
+- name: Add vmail user to mail group
+  file:
+    path: /var/email
+    state: directory
+    mode: 0755
+    owner: vmail
+    group: vmail
+    
+  
+- name: add config files
+  template: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode | default(644) }}"
+  with_items:
+    - {src: '10-auth.conf.j2',dest: '/etc/dovecot/conf.d/10-auth.conf'}
+    - {src: '10-mail.conf.j2',dest: '/etc/dovecot/conf.d/10-mail.conf'}
+    - {src: '10-master.conf.j2',dest: '/etc/dovecot/conf.d/10-master.conf'}
+    - {src: '10-ssl.conf.j2',dest: '/etc/dovecot/conf.d/10-ssl.conf'}
+    - {src: '15-lda.conf.j2',dest: '/etc/dovecot/conf.d/15-lda.conf'}
+    - {src: 'dovecot.conf.j2',dest: '/etc/dovecot/dovecot.conf'}
+    - {src: 'auth-sql.conf.ext.j2',dest: '/etc/dovecot/conf.d/auth-sql.conf.ext'}
+    - {src: 'dovecot-sql.conf.ext.j2',dest: '/etc/dovecot/dovecot-sql.conf.ext', mode=640}
+  notify:
+    - restart dovecot

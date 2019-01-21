@@ -1,0 +1,12 @@
+---
+
+- name: install php packages
+  apt: 
+    pkg: {{ item }} 
+    state: latest 
+    update_cache: yes
+  with_items: "{{ php_packages }}"
+  register: phpinstalled
+  notify:
+    - start php7-fpm
+    - reload nginx

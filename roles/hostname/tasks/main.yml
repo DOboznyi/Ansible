@@ -1,0 +1,10 @@
+---
+- name: set hostname mail
+  hostname:
+    name: "{{ server_name }}"
+    
+- name: add FQDN
+  template: 
+    src: hosts.j2 
+    dest: /etc/hosts 
+    mode: 0644
