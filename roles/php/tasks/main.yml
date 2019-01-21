@@ -2,7 +2,7 @@
 
 - name: install php packages
   apt: 
-    pkg: {{ item }} 
+    pkg: "{{ item }}" 
     state: latest 
     update_cache: yes
   with_items: "{{ php_packages }}"

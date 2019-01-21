@@ -2,7 +2,7 @@
 
 - name: install dovecot
   apt: 
-    name: {{ item }} 
+    name: "{{ item }}"
     state: latest 
     update_cache: true
   with_items:
