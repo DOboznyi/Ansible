@@ -11,4 +11,4 @@ install:
   - pip install ansible
 
 script:
-  - ansible-playbook -i tests/inventory test.yml --syntax-check
+  - ansible-playbook master.yml --syntax-check
