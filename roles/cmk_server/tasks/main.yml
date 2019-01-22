@@ -1,0 +1,10 @@
+---
+- name: get_url of latest stable version
+  uri:                                                               
+    url: https://api.github.com/repos/chrisss404/check-mk-arm/releases/latest
+    return_content: true                                             
+  register: json_reponse                                             
+
+- name: Install a .deb package
+  apt:
+    deb: "{{ json_reponse.json.tarball_url }}"
