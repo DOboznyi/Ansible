@@ -4,8 +4,13 @@
   register: swap_name
   when: expand_swap != false
 
+- name: get name of existing swap
+  command: swapon -s | awk '{print $3}' | tail -n +2
+  register: swap_size
+  when: expand_swap != false
+
 - name: Write swapfile
-  command: fallocate -l {{ swapfile_size }} {{ swapfile_location }}
+  command: fallocate -l {{ swapfile_size if expand_swap != false else swap_size }} {{ swapfile_location }}
   args:
     creates: "{{ swapfile_location }}"
   register: write_swapfile
