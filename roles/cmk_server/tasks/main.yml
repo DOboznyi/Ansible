@@ -8,3 +8,12 @@
 - name: Install a .deb package
   apt:
     deb: "{{ json_reponse.json.tarball_url }}"
+
+- name: Create site
+  command: omd create {{ cmk_site_name }}
+
+- name: Start site
+  command: omd start {{ cmk_site_name }}
+
+- name: Change password for admin panel
+  command: htpasswd -b -c /opt/omd/sites/{{ cmk_site_name }}/etc/htpasswd cmkadmin {{ admin_pass }}
