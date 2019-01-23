@@ -1,4 +1,9 @@
 ---
+- name: get name of existing swap
+  command: swapon -s | awk '{print $1}' | tail -n +2
+  register: swap_name
+  when: expand_swap != false
+
 - name: Write swapfile
   command: fallocate -l {{ swapfile_size }} {{ swapfile_location }}
   args:
@@ -25,6 +30,27 @@
   command: swapon {{ swapfile_location }}
   when: swapfile_size != false and create_swapfile.changed
 
+- name: Disable existing swapfile
+  command: swapoff {{ swap_name }}
+  when: swap_name != '0' and expand_swap != false
+
+- name: Expand existing swapfile
+  command: fallocate -l {{ swapfile_size }} {{ swap_name }}
+  when: swap_name != '0' and expand_swap != false
+
+- name: Enable existing swapfile
+  command: swapon {{ swap_name }}
+  when: swap_name != '0' and expand_swap != false
+
+- name: Disable temporary swapfile
+  command: swapoff {{ swapfile_location }}
+  when: swap_name != '0' and expand_swap != false
+
+- name: Delete existing
+  file:
+    path: "{{ swapfile_location }}"
+    state: absent
+
 - name: Add swapfile to /etc/fstab
   mount:
     name: none
@@ -34,7 +60,7 @@
     passno: '0'
     dump: '0'
     state: present
-  when: swapfile_size != false
+  when: swapfile_size != false and expand_swap = false
 
 - name: configure vm.swappiness
   sysctl:
