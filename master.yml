@@ -3,16 +3,16 @@
   become: yes
   user: root
   roles:
-    - common
-    - nginx
-    - mysql
-    - php
-    - composer
-    - letsencrypt
-    - phpmyadmin
-    - wordpress
-    - opendkim
-    - postfix
-    - dovecot
-    - roundcube
+    #- common
+    #- nginx
+    #- mysql
+    #- php
+    #- composer
+    #- letsencrypt
+    #- phpmyadmin
+    #- wordpress
+    #- opendkim
+    #- postfix
+    #- dovecot
+    #- roundcube
     - swap
