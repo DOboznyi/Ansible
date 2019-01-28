@@ -7,7 +7,7 @@
 
 - name: Install a .deb package
   apt:
-    deb: "{{ json_reponse.json.tarball_url }}"
+    deb: https://github.com/chrisss404/check-mk-arm/releases/download/{{ cmk_version }}/check-mk-raw-{{ cmk_version }}_0.stretch_armhf.deb
 
 - name: Create site
   command: omd create {{ cmk_site_name }}
