@@ -1,16 +1,17 @@
----
-- name: get_url of latest stable version
-  uri:                                                               
-    url: https://api.github.com/repos/chrisss404/check-mk-arm/releases/latest
-    return_content: true                                             
-  register: json_reponse                                             
+---                                       
 
 - name: Install a .deb package
   apt:
     deb: https://github.com/chrisss404/check-mk-arm/releases/download/{{ cmk_version }}/check-mk-raw-{{ cmk_version }}_0.stretch_armhf.deb
 
+- name: check if DB exists
+  shell: omd sites | grep {{ cmk_site_name }}
+  register: dbstatus
+  failed_when: dbstatus.rc == 2
+
 - name: Create site
   command: omd create {{ cmk_site_name }}
+  when: dbstatus.stdout == "0"
 
 - name: Start site
   command: omd start {{ cmk_site_name }}
