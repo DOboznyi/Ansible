@@ -55,6 +55,9 @@
   file:
     path: "{{ swapfile_location }}"
     state: absent
+    mode: 0700
+  #when: swap_name != '0' and expand_swap != false
+
 
 - name: Add swapfile to /etc/fstab
   mount:
