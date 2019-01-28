@@ -16,3 +16,4 @@
     #- dovecot
     #- roundcube
     - swap
+    - cmk_server
