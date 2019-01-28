@@ -10,7 +10,7 @@
   when: expand_swap != false
 
 - name: Write swapfile
-  command: fallocate -l {{ swapfile_size if expand_swap != false else swap_size }} {{ swapfile_location }}
+  command: fallocate -l {{ swapfile_size if expand_swap != false else swap_size }}
   args:
     creates: "{{ swapfile_location }}"
   register: write_swapfile
