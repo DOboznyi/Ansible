@@ -14,7 +14,7 @@
   when: siteexist.stdout == "0"
 
 - name: Check if site running
-  command: "omd status {{ cmk_site_name }} |grep "Overall state:  running""
+  command: "omd status {{ cmk_site_name }} |grep "Overall state:  running" "
   register: sitestatus
   failed_when: sitestatus.rc == 2
 
