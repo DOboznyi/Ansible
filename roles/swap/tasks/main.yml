@@ -58,7 +58,6 @@
     mode: 0700
   when: swap_name != '0' and expand_swap != false
 
-
 - name: Add swapfile to /etc/fstab
   mount:
     name: none
@@ -68,7 +67,7 @@
     passno: '0'
     dump: '0'
     state: present
-  when: swapfile_size != false and expand_swap = false
+  when: swapfile_size != false and expand_swap == false
 
 - name: configure vm.swappiness
   sysctl:
